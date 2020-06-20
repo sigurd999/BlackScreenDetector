@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CrashNSaneLoadDetector
+namespace SoALLoadDetector
 {
-	struct ImageCaptureInfo
+	public struct ImageCaptureInfo
 	{
 		public float featureVectorResolutionX;
 		public float featureVectorResolutionY;
@@ -97,8 +97,8 @@ namespace CrashNSaneLoadDetector
 
 				//Compute space occupied by black border relative to total width
 				var adjust_factor = ((float)(device_width - black_bar_width_total) / (float)device_width);
-				info.actual_crop_size_x *= adjust_factor;
-				info.actual_offset_x *= adjust_factor;
+				//info.actual_crop_size_x *= adjust_factor;
+				//info.actual_offset_x *= adjust_factor;
 			}
 			else
 			{
@@ -110,8 +110,8 @@ namespace CrashNSaneLoadDetector
 
 				//Compute space occupied by black border relative to total width
 				var adjust_factor = ((float)(device_height - black_bar_height_total) / (float)device_height);
-				info.actual_crop_size_y *= adjust_factor;
-				info.actual_offset_y *= adjust_factor;
+				//info.actual_crop_size_y *= adjust_factor;
+				//info.actual_offset_y *= adjust_factor;
 			}
 
 
@@ -124,7 +124,7 @@ namespace CrashNSaneLoadDetector
 		public static Bitmap CaptureFromDisplay(ref ImageCaptureInfo info)
 		{
 			Bitmap b = new Bitmap((int)info.actual_crop_size_x, (int)info.actual_crop_size_y);
-			
+
 			//Full screen capture
 			using (Graphics g = Graphics.FromImage(b))
 			{
@@ -186,7 +186,7 @@ namespace CrashNSaneLoadDetector
 			try
 			{
 
-			
+
 				Rectangle rc;
 				DLLImportStuff.GetClientRect(hwnd, out rc);
 
@@ -209,21 +209,21 @@ namespace CrashNSaneLoadDetector
 					rc.Width = (int)(info.crop_coordinate_right - info.crop_coordinate_left);
 					rc.Height = (int)(info.crop_coordinate_bottom - info.crop_coordinate_top);
 				}
-				
 
-				
+
+
 
 				//Compute crop coordinates and width/ height based on resoution
 				ImageCapture.SizeAdjustedCropAndOffset(rc.Width, rc.Height, ref info);
 
 
-				
-				
+
+
 
 				float cropOffsetX = info.actual_offset_x;
 				float cropOffsetY = info.actual_offset_y;
 
-				if(full)
+				if (full)
 				{
 					info.actual_offset_x = 0;
 					info.actual_offset_y = 0;
@@ -253,7 +253,7 @@ namespace CrashNSaneLoadDetector
 				info.actual_offset_y = cropOffsetY;
 
 
-				ret = (Bitmap) Image.FromHbitmap(hbmp).Clone();		
+				ret = (Bitmap)Image.FromHbitmap(hbmp).Clone();
 
 				DLLImportStuff.DeleteObject(hbmp);
 				DLLImportStuff.ReleaseDC(hwnd, hdcwnd);
@@ -263,7 +263,7 @@ namespace CrashNSaneLoadDetector
 			}
 			catch (System.Runtime.InteropServices.ExternalException ex)
 			{
-				
+
 				return new Bitmap(10, 10);
 			}
 		}

@@ -7,8 +7,8 @@
     <ProjectGuid>{1140E3E6-056C-457F-A86C-2CB91E40D8E0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CrashNSaneLoadDetector</RootNamespace>
-    <AssemblyName>CrashNSaneLoadDetector</AssemblyName>
+    <RootNamespace>BlackScreenDetector</RootNamespace>
+    <AssemblyName>BlackScreenDetector</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -62,11 +62,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="CrashNSaneLoadDetector.cs">
+    <Compile Include="SoALLoadDetector.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CrashNSaneLoadDetector.Designer.cs">
-      <DependentUpon>CrashNSaneLoadDetector.cs</DependentUpon>
+    <Compile Include="SoALLoadDetector.Designer.cs">
+      <DependentUpon>SoALLoadDetector.cs</DependentUpon>
     </Compile>
     <Compile Include="DLLImportStuff.cs" />
     <Compile Include="FeatureDetector.cs" />
@@ -74,8 +74,9 @@
     <Compile Include="KeyHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="CrashNSaneLoadDetector.resx">
-      <DependentUpon>CrashNSaneLoadDetector.cs</DependentUpon>
+    <EmbeddedResource Include="SoALLoadDetector.resx">
+      <DependentUpon>SoALLoadDetector.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

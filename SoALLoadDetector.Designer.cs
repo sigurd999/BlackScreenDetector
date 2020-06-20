@@ -1,6 +1,6 @@
-﻿namespace CrashNSaneLoadDetector
+﻿namespace SoALLoadDetector
 {
-	partial class CrashNSaneLoadDetector
+	partial class SoALLoadDetector
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -59,16 +59,20 @@
 			this.scalingLabel = new System.Windows.Forms.Label();
 			this.requiredMatchesUpDown = new System.Windows.Forms.NumericUpDown();
 			this.button2 = new System.Windows.Forms.Button();
+			this.label12 = new System.Windows.Forms.Label();
+			this.blackLevelNumericUpDown = new System.Windows.Forms.NumericUpDown();
+			this.pauseCountLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.imageDisplay)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.requiredMatchesUpDown)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.blackLevelNumericUpDown)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// startButton
 			// 
-			this.startButton.Location = new System.Drawing.Point(10, 632);
+			this.startButton.Location = new System.Drawing.Point(240, 864);
 			this.startButton.Name = "startButton";
 			this.startButton.Size = new System.Drawing.Size(43, 23);
 			this.startButton.TabIndex = 0;
@@ -78,16 +82,17 @@
 			// 
 			// imageDisplay
 			// 
-			this.imageDisplay.Location = new System.Drawing.Point(10, 107);
+			this.imageDisplay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.imageDisplay.Location = new System.Drawing.Point(16, 27);
 			this.imageDisplay.Name = "imageDisplay";
-			this.imageDisplay.Size = new System.Drawing.Size(500, 200);
+			this.imageDisplay.Size = new System.Drawing.Size(200, 800);
 			this.imageDisplay.TabIndex = 1;
 			this.imageDisplay.TabStop = false;
 			// 
 			// matchDisplayLabel
 			// 
 			this.matchDisplayLabel.AutoSize = true;
-			this.matchDisplayLabel.Location = new System.Drawing.Point(10, 469);
+			this.matchDisplayLabel.Location = new System.Drawing.Point(240, 701);
 			this.matchDisplayLabel.Name = "matchDisplayLabel";
 			this.matchDisplayLabel.Size = new System.Drawing.Size(13, 13);
 			this.matchDisplayLabel.TabIndex = 2;
@@ -95,7 +100,7 @@
 			// 
 			// pausedDisplay
 			// 
-			this.pausedDisplay.Location = new System.Drawing.Point(128, 592);
+			this.pausedDisplay.Location = new System.Drawing.Point(354, 824);
 			this.pausedDisplay.Name = "pausedDisplay";
 			this.pausedDisplay.Size = new System.Drawing.Size(37, 35);
 			this.pausedDisplay.TabIndex = 3;
@@ -103,7 +108,7 @@
 			// gameTimeLabel
 			// 
 			this.gameTimeLabel.AutoSize = true;
-			this.gameTimeLabel.Location = new System.Drawing.Point(10, 568);
+			this.gameTimeLabel.Location = new System.Drawing.Point(240, 800);
 			this.gameTimeLabel.Name = "gameTimeLabel";
 			this.gameTimeLabel.Size = new System.Drawing.Size(43, 13);
 			this.gameTimeLabel.TabIndex = 4;
@@ -112,7 +117,7 @@
 			// realTimeLabel
 			// 
 			this.realTimeLabel.AutoSize = true;
-			this.realTimeLabel.Location = new System.Drawing.Point(10, 525);
+			this.realTimeLabel.Location = new System.Drawing.Point(240, 757);
 			this.realTimeLabel.Name = "realTimeLabel";
 			this.realTimeLabel.Size = new System.Drawing.Size(43, 13);
 			this.realTimeLabel.TabIndex = 5;
@@ -121,7 +126,7 @@
 			// pausedTimeLabel
 			// 
 			this.pausedTimeLabel.AutoSize = true;
-			this.pausedTimeLabel.Location = new System.Drawing.Point(10, 613);
+			this.pausedTimeLabel.Location = new System.Drawing.Point(240, 845);
 			this.pausedTimeLabel.Name = "pausedTimeLabel";
 			this.pausedTimeLabel.Size = new System.Drawing.Size(43, 13);
 			this.pausedTimeLabel.TabIndex = 6;
@@ -131,7 +136,7 @@
 			// 
 			this.label5.AutoSize = true;
 			this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label5.Location = new System.Drawing.Point(6, 443);
+			this.label5.Location = new System.Drawing.Point(236, 675);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(142, 22);
 			this.label5.TabIndex = 7;
@@ -141,7 +146,7 @@
 			// 
 			this.label1.AutoSize = true;
 			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label1.Location = new System.Drawing.Point(6, 503);
+			this.label1.Location = new System.Drawing.Point(236, 735);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(92, 22);
 			this.label1.TabIndex = 8;
@@ -151,7 +156,7 @@
 			// 
 			this.label2.AutoSize = true;
 			this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label2.Location = new System.Drawing.Point(6, 546);
+			this.label2.Location = new System.Drawing.Point(236, 778);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(103, 22);
 			this.label2.TabIndex = 9;
@@ -161,7 +166,7 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label3.Location = new System.Drawing.Point(6, 592);
+			this.label3.Location = new System.Drawing.Point(236, 824);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(116, 22);
 			this.label3.TabIndex = 10;
@@ -170,7 +175,7 @@
 			// pauseSegmentList
 			// 
 			this.pauseSegmentList.FormattingEnabled = true;
-			this.pauseSegmentList.Location = new System.Drawing.Point(263, 534);
+			this.pauseSegmentList.Location = new System.Drawing.Point(493, 766);
 			this.pauseSegmentList.Name = "pauseSegmentList";
 			this.pauseSegmentList.Size = new System.Drawing.Size(142, 121);
 			this.pauseSegmentList.TabIndex = 11;
@@ -179,7 +184,7 @@
 			// 
 			this.label4.AutoSize = true;
 			this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label4.Location = new System.Drawing.Point(259, 504);
+			this.label4.Location = new System.Drawing.Point(489, 736);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(146, 22);
 			this.label4.TabIndex = 12;
@@ -188,7 +193,7 @@
 			// recordCheck
 			// 
 			this.recordCheck.AutoSize = true;
-			this.recordCheck.Location = new System.Drawing.Point(411, 534);
+			this.recordCheck.Location = new System.Drawing.Point(641, 766);
 			this.recordCheck.Name = "recordCheck";
 			this.recordCheck.Size = new System.Drawing.Size(105, 17);
 			this.recordCheck.TabIndex = 13;
@@ -201,7 +206,7 @@
 			this.saveDiagnosticCheck.AutoSize = true;
 			this.saveDiagnosticCheck.Checked = true;
 			this.saveDiagnosticCheck.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.saveDiagnosticCheck.Location = new System.Drawing.Point(411, 557);
+			this.saveDiagnosticCheck.Location = new System.Drawing.Point(641, 789);
 			this.saveDiagnosticCheck.Name = "saveDiagnosticCheck";
 			this.saveDiagnosticCheck.Size = new System.Drawing.Size(109, 17);
 			this.saveDiagnosticCheck.TabIndex = 14;
@@ -213,16 +218,16 @@
 			// 
 			this.label6.AutoSize = true;
 			this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label6.Location = new System.Drawing.Point(181, 443);
+			this.label6.Location = new System.Drawing.Point(411, 675);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(249, 22);
+			this.label6.Size = new System.Drawing.Size(153, 22);
 			this.label6.TabIndex = 15;
-			this.label6.Text = "Required Matches (for Pause)";
+			this.label6.Text = "Minimum Duration";
 			// 
 			// recordCurrentButton
 			// 
 			this.recordCurrentButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.recordCurrentButton.Location = new System.Drawing.Point(115, 632);
+			this.recordCurrentButton.Location = new System.Drawing.Point(345, 864);
 			this.recordCurrentButton.Name = "recordCurrentButton";
 			this.recordCurrentButton.Size = new System.Drawing.Size(116, 23);
 			this.recordCurrentButton.TabIndex = 17;
@@ -232,7 +237,7 @@
 			// 
 			// resetButton
 			// 
-			this.resetButton.Location = new System.Drawing.Point(59, 632);
+			this.resetButton.Location = new System.Drawing.Point(289, 864);
 			this.resetButton.Name = "resetButton";
 			this.resetButton.Size = new System.Drawing.Size(50, 23);
 			this.resetButton.TabIndex = 18;
@@ -243,7 +248,7 @@
 			// button1
 			// 
 			this.button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.button1.Location = new System.Drawing.Point(407, 604);
+			this.button1.Location = new System.Drawing.Point(637, 836);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(113, 23);
 			this.button1.TabIndex = 19;
@@ -254,7 +259,7 @@
 			// processListBox
 			// 
 			this.processListBox.FormattingEnabled = true;
-			this.processListBox.Location = new System.Drawing.Point(535, 534);
+			this.processListBox.Location = new System.Drawing.Point(765, 766);
 			this.processListBox.Name = "processListBox";
 			this.processListBox.Size = new System.Drawing.Size(142, 121);
 			this.processListBox.TabIndex = 20;
@@ -264,7 +269,7 @@
 			// 
 			this.label7.AutoSize = true;
 			this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label7.Location = new System.Drawing.Point(531, 503);
+			this.label7.Location = new System.Drawing.Point(761, 735);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(144, 22);
 			this.label7.TabIndex = 21;
@@ -273,7 +278,7 @@
 			// previewPictureBox
 			// 
 			this.previewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.previewPictureBox.Location = new System.Drawing.Point(693, 115);
+			this.previewPictureBox.Location = new System.Drawing.Point(243, 122);
 			this.previewPictureBox.Name = "previewPictureBox";
 			this.previewPictureBox.Size = new System.Drawing.Size(448, 252);
 			this.previewPictureBox.TabIndex = 22;
@@ -287,7 +292,7 @@
 			// 
 			this.label8.AutoSize = true;
 			this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label8.Location = new System.Drawing.Point(689, 2);
+			this.label8.Location = new System.Drawing.Point(239, 9);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(143, 22);
 			this.label8.TabIndex = 23;
@@ -296,7 +301,7 @@
 			// croppedPreviewPictureBox
 			// 
 			this.croppedPreviewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.croppedPreviewPictureBox.Location = new System.Drawing.Point(693, 403);
+			this.croppedPreviewPictureBox.Location = new System.Drawing.Point(243, 410);
 			this.croppedPreviewPictureBox.Name = "croppedPreviewPictureBox";
 			this.croppedPreviewPictureBox.Size = new System.Drawing.Size(448, 252);
 			this.croppedPreviewPictureBox.TabIndex = 24;
@@ -306,7 +311,7 @@
 			// 
 			this.label9.AutoSize = true;
 			this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label9.Location = new System.Drawing.Point(689, 378);
+			this.label9.Location = new System.Drawing.Point(239, 385);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(217, 22);
 			this.label9.TabIndex = 25;
@@ -316,7 +321,7 @@
 			// 
 			this.label10.AutoSize = true;
 			this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label10.Location = new System.Drawing.Point(6, 82);
+			this.label10.Location = new System.Drawing.Point(12, 2);
 			this.label10.Name = "label10";
 			this.label10.Size = new System.Drawing.Size(144, 22);
 			this.label10.TabIndex = 26;
@@ -325,7 +330,7 @@
 			// label11
 			// 
 			this.label11.AutoSize = true;
-			this.label11.Location = new System.Drawing.Point(690, 99);
+			this.label11.Location = new System.Drawing.Point(240, 106);
 			this.label11.Name = "label11";
 			this.label11.Size = new System.Drawing.Size(349, 13);
 			this.label11.TabIndex = 27;
@@ -334,7 +339,7 @@
 			// trackBar1
 			// 
 			this.trackBar1.LargeChange = 25;
-			this.trackBar1.Location = new System.Drawing.Point(693, 51);
+			this.trackBar1.Location = new System.Drawing.Point(243, 58);
 			this.trackBar1.Margin = new System.Windows.Forms.Padding(2);
 			this.trackBar1.Maximum = 201;
 			this.trackBar1.Minimum = 100;
@@ -350,7 +355,7 @@
 			// 
 			this.scalingLabel.AutoSize = true;
 			this.scalingLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.scalingLabel.Location = new System.Drawing.Point(689, 28);
+			this.scalingLabel.Location = new System.Drawing.Point(239, 35);
 			this.scalingLabel.Name = "scalingLabel";
 			this.scalingLabel.Size = new System.Drawing.Size(125, 22);
 			this.scalingLabel.TabIndex = 29;
@@ -358,14 +363,15 @@
 			// 
 			// requiredMatchesUpDown
 			// 
+			this.requiredMatchesUpDown.DecimalPlaces = 4;
 			this.requiredMatchesUpDown.Increment = new decimal(new int[] {
             5,
             0,
             0,
-            0});
-			this.requiredMatchesUpDown.Location = new System.Drawing.Point(185, 467);
+            131072});
+			this.requiredMatchesUpDown.Location = new System.Drawing.Point(415, 699);
 			this.requiredMatchesUpDown.Maximum = new decimal(new int[] {
-            575,
+            20,
             0,
             0,
             0});
@@ -373,16 +379,16 @@
 			this.requiredMatchesUpDown.Size = new System.Drawing.Size(120, 20);
 			this.requiredMatchesUpDown.TabIndex = 32;
 			this.requiredMatchesUpDown.Value = new decimal(new int[] {
-            520,
+            30,
             0,
             0,
-            0});
+            131072});
 			this.requiredMatchesUpDown.ValueChanged += new System.EventHandler(this.requiredMatchesUpDown_ValueChanged);
 			// 
 			// button2
 			// 
 			this.button2.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.button2.Location = new System.Drawing.Point(407, 632);
+			this.button2.Location = new System.Drawing.Point(637, 864);
 			this.button2.Name = "button2";
 			this.button2.Size = new System.Drawing.Size(113, 23);
 			this.button2.TabIndex = 33;
@@ -390,11 +396,51 @@
 			this.button2.UseVisualStyleBackColor = true;
 			this.button2.Click += new System.EventHandler(this.button2_Click);
 			// 
-			// CrashNSaneLoadDetector
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label12.Location = new System.Drawing.Point(570, 675);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(102, 22);
+			this.label12.TabIndex = 34;
+			this.label12.Text = "Black Level";
+			// 
+			// blackLevelNumericUpDown
+			// 
+			this.blackLevelNumericUpDown.DecimalPlaces = 4;
+			this.blackLevelNumericUpDown.Location = new System.Drawing.Point(574, 701);
+			this.blackLevelNumericUpDown.Maximum = new decimal(new int[] {
+            48,
+            0,
+            0,
+            0});
+			this.blackLevelNumericUpDown.Name = "blackLevelNumericUpDown";
+			this.blackLevelNumericUpDown.Size = new System.Drawing.Size(120, 20);
+			this.blackLevelNumericUpDown.TabIndex = 35;
+			this.blackLevelNumericUpDown.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			// 
+			// pauseCountLabel
+			// 
+			this.pauseCountLabel.AutoSize = true;
+			this.pauseCountLabel.Location = new System.Drawing.Point(351, 808);
+			this.pauseCountLabel.Name = "pauseCountLabel";
+			this.pauseCountLabel.Size = new System.Drawing.Size(13, 13);
+			this.pauseCountLabel.TabIndex = 36;
+			this.pauseCountLabel.Text = "0";
+			// 
+			// SoALLoadDetector
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1158, 674);
+			this.ClientSize = new System.Drawing.Size(1158, 913);
+			this.Controls.Add(this.pauseCountLabel);
+			this.Controls.Add(this.blackLevelNumericUpDown);
+			this.Controls.Add(this.label12);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.requiredMatchesUpDown);
 			this.Controls.Add(this.scalingLabel);
@@ -426,14 +472,15 @@
 			this.Controls.Add(this.matchDisplayLabel);
 			this.Controls.Add(this.imageDisplay);
 			this.Controls.Add(this.startButton);
-			this.Name = "CrashNSaneLoadDetector";
-			this.Text = "Crash N Sane Trilogy Load Detector";
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CrashNSaneLoadDetector_FormClosing);
+			this.Name = "SoALLoadDetector";
+			this.Text = "Skies of Arcadia Legends Load Detector";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SoALLoadDetector_FormClosing);
 			((System.ComponentModel.ISupportInitialize)(this.imageDisplay)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.requiredMatchesUpDown)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.blackLevelNumericUpDown)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -472,6 +519,9 @@
 		private System.Windows.Forms.Label scalingLabel;
 		private System.Windows.Forms.NumericUpDown requiredMatchesUpDown;
 		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Label label12;
+		private System.Windows.Forms.NumericUpDown blackLevelNumericUpDown;
+		private System.Windows.Forms.Label pauseCountLabel;
 	}
 }
 

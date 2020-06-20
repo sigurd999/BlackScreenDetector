@@ -1,4 +1,4 @@
-﻿using CrashNSaneLoadDetector;
+﻿using SoALLoadDetector;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,21 +11,21 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing.Drawing2D;
  
-namespace CrashNSaneLoadDetector
+namespace SoALLoadDetector
 {
-	public partial class CrashNSaneLoadDetector : Form
+	public partial class SoALLoadDetector : Form
 	{
 		#region Private Fields
 
-		private Size captureSize = new Size(300, 100);
+		private Size captureSize = new Size(200, 800);
 		private float featureVectorResolutionX = 1920.0f;
 		private float featureVectorResolutionY = 1080.0f;
 
-		private float captureAspectRatioX = 16.0f;
-		private float captureAspectRatioY = 9.0f;
+		private float captureAspectRatioX = 4.0f;
+		private float captureAspectRatioY = 3.0f;
 
 		private float cropOffsetX = 0.0f;
-		private float cropOffsetY = -40.0f;
+		private float cropOffsetY = -100.0f;
 
 		private ImageCaptureInfo imageCaptureInfo;
 
@@ -77,7 +77,7 @@ namespace CrashNSaneLoadDetector
 		private int snapshotMilliseconds = 500;
 		private int timerIntervalMilliseconds = 20;
 		private DateTime timerBegin;
-		private string DiagnosticsFolderName = "CrashNSTDiagnostics/";
+		private string DiagnosticsFolderName = "SoALLoadDetectorDiagnostics/";
 
 		//used as a cutoff for when a match is detected correctly
 		private float varianceOfBinsAllowed = 0.2f;
@@ -102,12 +102,16 @@ namespace CrashNSaneLoadDetector
 		private int scalingValue = 100;
 		private float scalingValueFloat = 1.0f;
 		private int[] HistogramOfMatchingBins;
+
+		public float MinimumBlackLength = 0.0f;
+		public int BlackLevel = 10;
+
 		#endregion Private Fields
 
 		#region Public Constructors
 
 		//amount of variance allowed for correct comparison
-		public CrashNSaneLoadDetector()
+		public SoALLoadDetector()
 		{
 			InitializeComponent();
 			captureTimer = new System.Timers.Timer();
@@ -140,9 +144,9 @@ namespace CrashNSaneLoadDetector
 			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
 
 
-			requiredMatchesUpDown.Value = FeatureDetector.numberOfBinsCorrect;
+			requiredMatchesUpDown.Value = Convert.ToDecimal(MinimumBlackLength);
+			blackLevelNumericUpDown.Value = Convert.ToDecimal(BlackLevel);
 
-			
 
 			StartKeyHandler = new KeyHandler(Keys.NumPad1, this);
 			StartKeyHandler.Register();
@@ -251,7 +255,7 @@ namespace CrashNSaneLoadDetector
 			Bitmap b = new Bitmap(1, 1);
 
 			//Full screen capture
-			if(processCaptureIndex < 0)
+			if (processCaptureIndex < 0)
 			{
 				Screen selected_screen = Screen.AllScreens[-processCaptureIndex - 1];
 				Rectangle screenRect = selected_screen.Bounds;
@@ -260,7 +264,6 @@ namespace CrashNSaneLoadDetector
 				screenRect.Height = (int)(screenRect.Height * scalingValueFloat);
 
 				Point screenCenter = new Point(screenRect.Width / 2, screenRect.Height / 2);
-
 
 				//Change size according to selected crop
 				screenRect.Width = (int)(imageCaptureInfo.crop_coordinate_right - imageCaptureInfo.crop_coordinate_left);
@@ -277,9 +280,6 @@ namespace CrashNSaneLoadDetector
 				imageCaptureInfo.center_of_frame_x += selected_screen.Bounds.X;
 				imageCaptureInfo.center_of_frame_y += selected_screen.Bounds.Y;
 
-				
-				
-
 				b = ImageCapture.CaptureFromDisplay(ref imageCaptureInfo);
 			}
 			else
@@ -289,7 +289,7 @@ namespace CrashNSaneLoadDetector
 				if (processCaptureIndex >= processList.Length)
 					return b;
 
-				if(processCaptureIndex != -1)
+				if (processCaptureIndex != -1)
 				{
 					handle = processList[processCaptureIndex].MainWindowHandle;
 				}
@@ -301,7 +301,6 @@ namespace CrashNSaneLoadDetector
 				b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, useCrop: true);
 			}
 
-			
 			return b;
 		}
 
@@ -502,20 +501,19 @@ namespace CrashNSaneLoadDetector
 			try
 			{
 				Stopwatch stopwatch = Stopwatch.StartNew();
-				Bitmap bmp = null;
 
-
-
-				bmp = CaptureImage();
-
-				List<int> features = FeatureDetector.featuresFromBitmap(bmp);
-
+				var capture = CaptureImage();
+				List<int> max_per_patch;
+				List<int> min_per_patch;
+				int black_level = 0;
+				var features = FeatureDetector.featuresFromBitmap(capture, out max_per_patch, out black_level, out min_per_patch);
+				float new_avg_transition_max = 0.0f;
+				int tempMatchingBins = 0;
+				var isLoading = FeatureDetector.compareFeatureVectorTransition(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, max_per_patch, min_per_patch, -1.0f, out new_avg_transition_max, out tempMatchingBins, 0.8f, false, BlackLevel);//FeatureDetector.isGameTransition(capture, 30);
 
 				lastFeatures = features;
-				int tempMatchingBins = 0;
-				bool matchingHistograms = FeatureDetector.compareFeatureVector(features.ToArray(), out tempMatchingBins, true);
 
-				currentlyPaused = matchingHistograms;
+				currentlyPaused = isLoading;
 
 				HistogramOfMatchingBins[tempMatchingBins]++;
 				if (snapshotMilliseconds <= 0)
@@ -524,7 +522,7 @@ namespace CrashNSaneLoadDetector
 
 					snapshotFrameCount = frameCount;
 
-					segmentSnapshots.Add(bmp);
+					segmentSnapshots.Add(capture);
 					segmentMatchingBins.Add(tempMatchingBins);
 					segmentFeatureVectors.Add(features);
 					segmentFrameCounts.Add(frameCount);
@@ -554,7 +552,7 @@ namespace CrashNSaneLoadDetector
 					try
 					{
 
-						bmp.Save(DiagnosticsFolderName + "imgs_features_interesting/img_" + frameCount + "_" + tempMatchingBins + ".jpg", ImageFormat.Jpeg);
+						capture.Save(DiagnosticsFolderName + "imgs_features_interesting/img_" + frameCount + "_" + tempMatchingBins + ".jpg", ImageFormat.Jpeg);
 					}
 					catch
 					{
@@ -577,8 +575,8 @@ namespace CrashNSaneLoadDetector
 
 						try
 						{
-							
-							bmp.Save(DiagnosticsFolderName + "imgs_stopped/img_" + frameCount + "_" + tempMatchingBins + ".jpg", ImageFormat.Jpeg);
+
+							capture.Save(DiagnosticsFolderName + "imgs_stopped/img_" + frameCount + "_" + tempMatchingBins + ".jpg", ImageFormat.Jpeg);
 						}
 						catch
 						{
@@ -599,7 +597,7 @@ namespace CrashNSaneLoadDetector
 						System.IO.Directory.CreateDirectory(DiagnosticsFolderName + "imgs_running");
 						try
 						{
-							bmp.Save(DiagnosticsFolderName + "imgs_running/img_" + frameCount + "_" + tempMatchingBins + ".jpg", ImageFormat.Jpeg);
+							capture.Save(DiagnosticsFolderName + "imgs_running/img_" + frameCount + "_" + tempMatchingBins + ".jpg", ImageFormat.Jpeg);
 						}
 						catch
 						{
@@ -622,22 +620,15 @@ namespace CrashNSaneLoadDetector
 						{
 
 
-							imageDisplay.Image = bmp;
+							imageDisplay.Image = capture;
 							imageDisplay.Size = new Size(captureSize.Width, captureSize.Height);
-							imageDisplay.BackgroundImage = bmp;
+							imageDisplay.BackgroundImage = capture;
 							imageDisplay.Refresh();
 							matchDisplayLabel.Text = tempMatchingBins.ToString();
 							//requiredMatchesTxt.Text = numberOfBinsCorrect.ToString();
-							if (matchingHistograms)
-							{
-							//paused
-							pausedDisplay.BackColor = Color.Red;
-							}
-							else
-							{
-							//running
-							pausedDisplay.BackColor = Color.Green;
-							}
+							pausedDisplay.BackColor = isLoading ? Color.Red : Color.Green;
+
+							pauseCountLabel.Text = pauseSegmentList.Items.Count.ToString();
 						}
 						catch
 						{
@@ -658,7 +649,6 @@ namespace CrashNSaneLoadDetector
 				return new List<int>();
 			}
 			//bmp.Dispose();
-			
 		}
 		
 
@@ -695,8 +685,6 @@ namespace CrashNSaneLoadDetector
 		{
 			resetState();
 			captureTimer.Enabled = false;
-			gameTimer.Enabled = false;
-			realTimer.Enabled = false;
 		}
 
 		private void resetState()
@@ -738,6 +726,9 @@ namespace CrashNSaneLoadDetector
 
 			if(captureTimer.Enabled == true)
 			{
+				captureTimer.Enabled = false;
+				gameTimer.Enabled = false;
+				realTimer.Enabled = false;
 				return;
 			}
 
@@ -772,7 +763,7 @@ namespace CrashNSaneLoadDetector
 
 		private int currentRecordCount = 0;
 
-		private void CrashNSaneLoadDetector_FormClosing(object sender, FormClosingEventArgs e)
+		private void SoALLoadDetector_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			gameTimer.Enabled = false;
 			realTimer.Enabled = false;
@@ -812,6 +803,8 @@ namespace CrashNSaneLoadDetector
 
 		private void saveFeatureVectorToTxt(List<int> featureVector, string filename, string directoryName)
 		{
+			return;
+
 			System.IO.Directory.CreateDirectory(directoryName);
 			try
 			{
@@ -850,9 +843,12 @@ namespace CrashNSaneLoadDetector
 				gr.DrawImage(bmp, new Rectangle(0, 0, clone.Width, clone.Height));
 			}
 
-			List<int> features = FeatureDetector.featuresFromBitmap(clone);
-
-			bool compare_result = FeatureDetector.compareFeatureVector(features.ToArray(), out matchingBins);
+			List<int> dummy;
+			List<int> dummy2;
+			int black_level = 0;
+			var features = FeatureDetector.featuresFromBitmap(clone, out dummy, out black_level, out dummy2);
+			
+			var compare_result = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out matchingBins, -1.0f, true);
 
 			Console.WriteLine("RESULT: " + matchingBins + " matching bins, compare == " + compare_result);
 
@@ -932,9 +928,6 @@ namespace CrashNSaneLoadDetector
 			//Draw selection rectangle
 			DrawCaptureRectangleBitmap();
 
-
-
-
 			//Compute image crop coordinates according to selection rectangle
 
 			//Get raw image size from imageCaptureInfo.actual_crop_size to compute scaling between raw and rectangle coordinates
@@ -951,19 +944,19 @@ namespace CrashNSaneLoadDetector
 			copy.crop_coordinate_top = selectionRectanglePreviewBox.Top  * (crop_size_y / previewPictureBox.Height);
 			copy.crop_coordinate_bottom = selectionRectanglePreviewBox.Bottom * (crop_size_y / previewPictureBox.Height);
 
-
-
 			croppedPreviewPictureBox.Image = CaptureImageFullPreview(ref copy, useCrop:true);
-
 
 			copy.captureSizeX = captureSize.Width;
 			copy.captureSizeY = captureSize.Height;
 
 			//Show matching bins for preview
 			var capture = CaptureImage();
-			var features = FeatureDetector.featuresFromBitmap(capture);
+			List<int> dummy;
+			List<int> dummy2;
+			int black_level = 0;
+			var features = FeatureDetector.featuresFromBitmap(capture, out dummy, out black_level, out dummy2);
 			int tempMatchingBins = 0;
-			var isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), out tempMatchingBins, false);
+			var isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
 
 			matchDisplayLabel.Text = tempMatchingBins.ToString();
 		}
@@ -1041,7 +1034,7 @@ namespace CrashNSaneLoadDetector
 
 		private void requiredMatchesUpDown_ValueChanged(object sender, EventArgs e)
 		{
-			FeatureDetector.numberOfBinsCorrect = (int)requiredMatchesUpDown.Value;
+			MinimumBlackLength = Convert.ToSingle(requiredMatchesUpDown.Value);
 		}
 
 		private void button2_Click(object sender, EventArgs e)
@@ -1070,9 +1063,12 @@ namespace CrashNSaneLoadDetector
 					gr.DrawImage(bmp, new Rectangle(0, 0, clone.Width, clone.Height));
 				}
 
-				List<int> features = FeatureDetector.featuresFromBitmap(clone);
+				List<int> dummy;
+				List<int> dummy2;
+				int black_level = 0;
+				var features = FeatureDetector.featuresFromBitmap(clone, out dummy, out black_level, out dummy2);
 				int tempMatchingBins = 0;
-				bool compare_result = FeatureDetector.compareFeatureVector(features.ToArray(), out tempMatchingBins);
+				var compare_result = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins);
 
 				Console.WriteLine("RESULT: " + tempMatchingBins + " matching bins, compare == " + compare_result);
 

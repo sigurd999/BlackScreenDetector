@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CrashNSaneLoadDetector
+namespace SoALLoadDetector
 {
 	static class Program
 	{
@@ -20,7 +20,7 @@ namespace CrashNSaneLoadDetector
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new CrashNSaneLoadDetector());
+			Application.Run(new SoALLoadDetector());
 		}
 	}
 }
