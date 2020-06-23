@@ -44,9 +44,7 @@
 			this.recordCheck = new System.Windows.Forms.CheckBox();
 			this.saveDiagnosticCheck = new System.Windows.Forms.CheckBox();
 			this.label6 = new System.Windows.Forms.Label();
-			this.recordCurrentButton = new System.Windows.Forms.Button();
 			this.resetButton = new System.Windows.Forms.Button();
-			this.button1 = new System.Windows.Forms.Button();
 			this.processListBox = new System.Windows.Forms.ListBox();
 			this.label7 = new System.Windows.Forms.Label();
 			this.previewPictureBox = new System.Windows.Forms.PictureBox();
@@ -55,17 +53,16 @@
 			this.label9 = new System.Windows.Forms.Label();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			this.trackBar1 = new System.Windows.Forms.TrackBar();
+			this.scaleTrackBar = new System.Windows.Forms.TrackBar();
 			this.scalingLabel = new System.Windows.Forms.Label();
 			this.requiredMatchesUpDown = new System.Windows.Forms.NumericUpDown();
-			this.button2 = new System.Windows.Forms.Button();
 			this.label12 = new System.Windows.Forms.Label();
 			this.blackLevelNumericUpDown = new System.Windows.Forms.NumericUpDown();
 			this.pauseCountLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.imageDisplay)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.scaleTrackBar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.requiredMatchesUpDown)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.blackLevelNumericUpDown)).BeginInit();
 			this.SuspendLayout();
@@ -224,17 +221,6 @@
 			this.label6.TabIndex = 15;
 			this.label6.Text = "Minimum Duration";
 			// 
-			// recordCurrentButton
-			// 
-			this.recordCurrentButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.recordCurrentButton.Location = new System.Drawing.Point(345, 864);
-			this.recordCurrentButton.Name = "recordCurrentButton";
-			this.recordCurrentButton.Size = new System.Drawing.Size(116, 23);
-			this.recordCurrentButton.TabIndex = 17;
-			this.recordCurrentButton.Text = "Record Current Feature";
-			this.recordCurrentButton.UseVisualStyleBackColor = true;
-			this.recordCurrentButton.Click += new System.EventHandler(this.recordCurrentButton_Click);
-			// 
 			// resetButton
 			// 
 			this.resetButton.Location = new System.Drawing.Point(289, 864);
@@ -244,17 +230,6 @@
 			this.resetButton.Text = "Reset";
 			this.resetButton.UseVisualStyleBackColor = true;
 			this.resetButton.Click += new System.EventHandler(this.resetButton_Click);
-			// 
-			// button1
-			// 
-			this.button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.button1.Location = new System.Drawing.Point(637, 836);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(113, 23);
-			this.button1.TabIndex = 19;
-			this.button1.Text = "Feature from File";
-			this.button1.UseVisualStyleBackColor = true;
-			this.button1.Click += new System.EventHandler(this.button1_Click);
 			// 
 			// processListBox
 			// 
@@ -336,20 +311,20 @@
 			this.label11.TabIndex = 27;
 			this.label11.Text = "Left Click sets top-left corner, right click sets bottom-right corner of region";
 			// 
-			// trackBar1
+			// scaleTrackBar
 			// 
-			this.trackBar1.LargeChange = 25;
-			this.trackBar1.Location = new System.Drawing.Point(243, 58);
-			this.trackBar1.Margin = new System.Windows.Forms.Padding(2);
-			this.trackBar1.Maximum = 201;
-			this.trackBar1.Minimum = 100;
-			this.trackBar1.Name = "trackBar1";
-			this.trackBar1.Size = new System.Drawing.Size(78, 45);
-			this.trackBar1.SmallChange = 25;
-			this.trackBar1.TabIndex = 28;
-			this.trackBar1.TickFrequency = 25;
-			this.trackBar1.Value = 100;
-			this.trackBar1.ValueChanged += new System.EventHandler(this.trackBar1_ValueChanged);
+			this.scaleTrackBar.LargeChange = 25;
+			this.scaleTrackBar.Location = new System.Drawing.Point(243, 58);
+			this.scaleTrackBar.Margin = new System.Windows.Forms.Padding(2);
+			this.scaleTrackBar.Maximum = 201;
+			this.scaleTrackBar.Minimum = 100;
+			this.scaleTrackBar.Name = "scaleTrackBar";
+			this.scaleTrackBar.Size = new System.Drawing.Size(78, 45);
+			this.scaleTrackBar.SmallChange = 25;
+			this.scaleTrackBar.TabIndex = 28;
+			this.scaleTrackBar.TickFrequency = 25;
+			this.scaleTrackBar.Value = 100;
+			this.scaleTrackBar.ValueChanged += new System.EventHandler(this.scaleTrackBar_ValueChanged);
 			// 
 			// scalingLabel
 			// 
@@ -384,17 +359,6 @@
             0,
             131072});
 			this.requiredMatchesUpDown.ValueChanged += new System.EventHandler(this.requiredMatchesUpDown_ValueChanged);
-			// 
-			// button2
-			// 
-			this.button2.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.button2.Location = new System.Drawing.Point(637, 864);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(113, 23);
-			this.button2.TabIndex = 33;
-			this.button2.Text = "Features from Folder";
-			this.button2.UseVisualStyleBackColor = true;
-			this.button2.Click += new System.EventHandler(this.button2_Click);
 			// 
 			// label12
 			// 
@@ -441,10 +405,9 @@
 			this.Controls.Add(this.pauseCountLabel);
 			this.Controls.Add(this.blackLevelNumericUpDown);
 			this.Controls.Add(this.label12);
-			this.Controls.Add(this.button2);
 			this.Controls.Add(this.requiredMatchesUpDown);
 			this.Controls.Add(this.scalingLabel);
-			this.Controls.Add(this.trackBar1);
+			this.Controls.Add(this.scaleTrackBar);
 			this.Controls.Add(this.label11);
 			this.Controls.Add(this.label10);
 			this.Controls.Add(this.label9);
@@ -453,9 +416,7 @@
 			this.Controls.Add(this.previewPictureBox);
 			this.Controls.Add(this.label7);
 			this.Controls.Add(this.processListBox);
-			this.Controls.Add(this.button1);
 			this.Controls.Add(this.resetButton);
-			this.Controls.Add(this.recordCurrentButton);
 			this.Controls.Add(this.label6);
 			this.Controls.Add(this.saveDiagnosticCheck);
 			this.Controls.Add(this.recordCheck);
@@ -478,7 +439,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.imageDisplay)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.scaleTrackBar)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.requiredMatchesUpDown)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.blackLevelNumericUpDown)).EndInit();
 			this.ResumeLayout(false);
@@ -504,9 +465,7 @@
 		private System.Windows.Forms.CheckBox recordCheck;
 		private System.Windows.Forms.CheckBox saveDiagnosticCheck;
 		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Button recordCurrentButton;
 		private System.Windows.Forms.Button resetButton;
-		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.ListBox processListBox;
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.PictureBox previewPictureBox;
@@ -515,10 +474,9 @@
 		private System.Windows.Forms.Label label9;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.TrackBar trackBar1;
+		private System.Windows.Forms.TrackBar scaleTrackBar;
 		private System.Windows.Forms.Label scalingLabel;
 		private System.Windows.Forms.NumericUpDown requiredMatchesUpDown;
-		private System.Windows.Forms.Button button2;
 		private System.Windows.Forms.Label label12;
 		private System.Windows.Forms.NumericUpDown blackLevelNumericUpDown;
 		private System.Windows.Forms.Label pauseCountLabel;

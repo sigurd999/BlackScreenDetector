@@ -7,7 +7,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Timers;
 using System.Windows.Forms;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing.Drawing2D;
  
@@ -29,6 +28,16 @@ namespace SoALLoadDetector
 
 		private ImageCaptureInfo imageCaptureInfo;
 
+		private Bitmap lastDiagnosticCapture = null;
+
+		private List<int> lastFeatures = null;
+
+		private Bitmap lastFullCapture = null;
+
+		private Bitmap lastFullCroppedCapture = null;
+
+		private int lastMatchingBins = 0;
+
 		private System.Timers.Timer captureTimer;
 		private bool currentlyPaused = false;
 
@@ -36,7 +45,7 @@ namespace SoALLoadDetector
 		private TimeSpan gameTime;
 		private System.Timers.Timer gameTimer;
 		//private List<bool> histogramMatches;
-		private List<int> lastFeatures;
+
 		private int lastPausedFrame = 0;
 		private int lastRunningFrame = 0;
 		private int lastSaveFrame = 0;
@@ -79,13 +88,7 @@ namespace SoALLoadDetector
 		private DateTime timerBegin;
 		private string DiagnosticsFolderName = "SoALLoadDetectorDiagnostics/";
 
-		//used as a cutoff for when a match is detected correctly
-		private float varianceOfBinsAllowed = 0.2f;
-
 		private bool wasPaused = false;
-
-		private KeyHandler StartKeyHandler;
-		private KeyHandler ResetKeyHandler;
 
 		private Process[] processList;
 
@@ -101,7 +104,6 @@ namespace SoALLoadDetector
 
 		private int scalingValue = 100;
 		private float scalingValueFloat = 1.0f;
-		private int[] HistogramOfMatchingBins;
 
 		public float MinimumBlackLength = 0.0f;
 		public int BlackLevel = 10;
@@ -110,10 +112,33 @@ namespace SoALLoadDetector
 
 		#region Public Constructors
 
+		private void DeserializeAndUpdateDetectorData()
+		{
+			// TODO: hardcode this for FF7R. Potentially capture full window? not sure about performance...
+
+			//DetectorData data = DeserializeDetectorData(LoadRemoverDataName);
+
+			DetectorData data = new DetectorData();
+
+			data.sizeX = 200;
+			data.sizeY = 800;
+			data.numPatchesX = 4;
+			data.numPatchesY = 16;
+			captureSize.Width = data.sizeX;
+			captureSize.Height = data.sizeY;
+
+
+			FeatureDetector.numberOfBins = 16;
+			FeatureDetector.patchSizeX = captureSize.Width / data.numPatchesX;
+			FeatureDetector.patchSizeY = captureSize.Height / data.numPatchesY;
+
+		}
+
 		//amount of variance allowed for correct comparison
 		public SoALLoadDetector()
 		{
 			InitializeComponent();
+			DeserializeAndUpdateDetectorData();
 			captureTimer = new System.Timers.Timer();
 
 			captureTimer.Elapsed += recordOrDetect;
@@ -131,28 +156,13 @@ namespace SoALLoadDetector
 			listOfFeatureVectors = new List<List<int>>();
 			//histogramMatches = new List<bool>();
 			msElapsed = new List<long>();
-			lastFeatures = new List<int>();
 			segmentSnapshots = new List<Bitmap>();
 			segmentMatchingBins = new List<int>();
 			segmentFrameCounts = new List<int>();
 			segmentFeatureVectors = new List<List<int>>();
-			HistogramOfMatchingBins = new int[577];
-
-			selectionTopLeft = new Point(0, 0);
-			selectionBottomRight = new Point(previewPictureBox.Width, previewPictureBox.Height);
-
-			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
-
 
 			requiredMatchesUpDown.Value = Convert.ToDecimal(MinimumBlackLength);
 			blackLevelNumericUpDown.Value = Convert.ToDecimal(BlackLevel);
-
-
-			StartKeyHandler = new KeyHandler(Keys.NumPad1, this);
-			StartKeyHandler.Register();
-
-			ResetKeyHandler = new KeyHandler(Keys.NumPad3, this);
-			ResetKeyHandler.Register();
 
 			Process[] processListtmp = Process.GetProcesses();
 			List<Process> processes_with_name = new List<Process>();
@@ -177,78 +187,17 @@ namespace SoALLoadDetector
 			}
 
 			processList = processes_with_name.ToArray();
-			
-		
-			imageCaptureInfo = new ImageCaptureInfo();
-
-			imageCaptureInfo.featureVectorResolutionX = featureVectorResolutionX;
-			imageCaptureInfo.featureVectorResolutionY = featureVectorResolutionY;
-			imageCaptureInfo.captureSizeX = captureSize.Width;
-			imageCaptureInfo.captureSizeY = captureSize.Height;
-			imageCaptureInfo.cropOffsetX = cropOffsetX;
-			imageCaptureInfo.cropOffsetY = cropOffsetY;
-			imageCaptureInfo.captureAspectRatio = captureAspectRatioX / captureAspectRatioY;
-
 			processListBox.SelectedIndex = 0;
+
+			initImageCaptureInfo();
+
+			DrawPreview();
 		}
 
 		#endregion Public Constructors
 
 
 		#region Private Methods
-		
-		/*
-		[DllImport("user32.dll")]
-		internal static extern bool GetWindowRect(IntPtr hWnd, out Rectangle lpRect);
-		[DllImport("user32.dll")]
-		internal static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, int nFlags);
-
-
-		private Bitmap PrintWindow(IntPtr hwnd)
-		{
-			Rectangle rc;
-			GetWindowRect(hwnd, out rc);
-
-			if (rc.Width < 0)
-				return new Bitmap(1, 1);
-
-			Bitmap bmp = new Bitmap(300, 100, PixelFormat.Format32bppArgb);
-			Graphics gfxBmp = Graphics.FromImage(bmp);
-			IntPtr hdcBitmap = gfxBmp.GetHdc();
-			bool succeeded = PrintWindow(hwnd, hdcBitmap, 0);
-			gfxBmp.ReleaseHdc(hdcBitmap);
-			if (!succeeded)
-			{
-				gfxBmp.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(Point.Empty, bmp.Size));
-			}
-			
-			gfxBmp.Dispose();
-			return bmp;
-		}*/
-		
-
-		private void HandleHotkey(ref Message m)
-		{
-			// Do stuff...
-			Keys key = (Keys)m.WParam.ToInt32();
-
-			if(key == Keys.NumPad3)
-			{
-				resetButton_Click(this, null);
-			}
-			else if (key == Keys.NumPad1)
-			{
-				startButton_Click(this, null);
-			}
-
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			if (m.Msg == Constants.WM_HOTKEY_MSG_ID)
-				HandleHotkey(ref m);
-			base.WndProc(ref m);
-		}
 	
 		private Bitmap CaptureImage()
 		{
@@ -317,25 +266,22 @@ namespace SoALLoadDetector
 				screenRect.Width = (int)(screenRect.Width * scalingValueFloat);
 				screenRect.Height = (int)(screenRect.Height * scalingValueFloat);
 
+				Point screenCenter = new Point((int)(screenRect.Width / 2.0f), (int)(screenRect.Height / 2.0f));
 
-				Point screenCenter = new Point((int)(screenRect.Width / 2.0f), (int)(screenRect.Height/ 2.0f));
-
-				if(useCrop)
+				if (useCrop)
 				{
 					//Change size according to selected crop
 					screenRect.Width = (int)(imageCaptureInfo.crop_coordinate_right - imageCaptureInfo.crop_coordinate_left);
 					screenRect.Height = (int)(imageCaptureInfo.crop_coordinate_bottom - imageCaptureInfo.crop_coordinate_top);
 				}
-				
 
 				//Compute crop coordinates and width/ height based on resoution
 				ImageCapture.SizeAdjustedCropAndOffset(screenRect.Width, screenRect.Height, ref imageCaptureInfo);
 
-
 				imageCaptureInfo.actual_crop_size_x = 2 * imageCaptureInfo.center_of_frame_x;
 				imageCaptureInfo.actual_crop_size_y = 2 * imageCaptureInfo.center_of_frame_y;
 
-				if(useCrop)
+				if (useCrop)
 				{
 					//Adjust for crop offset
 					imageCaptureInfo.center_of_frame_x += imageCaptureInfo.crop_coordinate_left;
@@ -353,9 +299,6 @@ namespace SoALLoadDetector
 
 				imageCaptureInfo.actual_offset_x = cropOffsetX;
 				imageCaptureInfo.actual_offset_y = cropOffsetY;
-
-
-
 			}
 			else
 			{
@@ -373,11 +316,8 @@ namespace SoALLoadDetector
 				if ((int)handle == 0)
 					return b;
 
-			
-
-				b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, full:true, useCrop:useCrop, scalingValueFloat:scalingValueFloat);
+				b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, full: true, useCrop: useCrop, scalingValueFloat: scalingValueFloat);
 			}
-
 
 			return b;
 		}
@@ -409,13 +349,6 @@ namespace SoALLoadDetector
 					{
 						pauseSegmentList.Items.Add(DateTime.Now - loadStart);
 
-						if(DateTime.Now - loadStart >= new TimeSpan(0, 0, 0, 20))
-						{
-							this.BackColor = Color.Red;
-							Console.WriteLine("OMG ERROR WTF");
-							resetState();
-						}
-
 						if (saveDiagnosticImages)
 						{
 							//Set this early, otherwise we might enter multiple times if there are a lot of images to save
@@ -430,17 +363,18 @@ namespace SoALLoadDetector
 								bmp.Save(DiagnosticsFolderName + "pauseSegmentSnapshots/" + currentSnapshotFrameCount.ToString() + "/" + idx + "_" + segmentMatchingBins[idx] + ".jpg", ImageFormat.Jpeg);
 								saveFeatureVectorToTxt(segmentFeatureVectors[idx], "features_" + segmentFrameCounts[idx] + "_" + segmentMatchingBins[idx] + ".txt", DiagnosticsFolderName + "pauseSegmentSnapshots/" + currentSnapshotFrameCount.ToString());
 							}
-						}
-						//Clear segment data
 
-						foreach (Bitmap bmp in segmentSnapshots)
-						{
-							bmp.Dispose();
+							//Clear segment data
+
+							foreach (Bitmap bmp in segmentSnapshots)
+							{
+								bmp.Dispose();
+							}
+							segmentSnapshots.Clear();
+							segmentMatchingBins.Clear();
+							segmentFeatureVectors.Clear();
+							segmentFrameCounts.Clear();
 						}
-						segmentSnapshots.Clear();
-						segmentMatchingBins.Clear();
-						segmentFeatureVectors.Clear();
-						segmentFrameCounts.Clear();
 					}));
 				}
 				catch
@@ -515,8 +449,7 @@ namespace SoALLoadDetector
 
 				currentlyPaused = isLoading;
 
-				HistogramOfMatchingBins[tempMatchingBins]++;
-				if (snapshotMilliseconds <= 0)
+				if (saveDiagnosticImages && snapshotMilliseconds <= 0)
 				{
 					snapshotMilliseconds = milliSecondsBetweenSnapshots;
 
@@ -622,13 +555,14 @@ namespace SoALLoadDetector
 
 							imageDisplay.Image = capture;
 							imageDisplay.Size = new Size(captureSize.Width, captureSize.Height);
-							imageDisplay.BackgroundImage = capture;
+							//imageDisplay.BackgroundImage = capture;
 							imageDisplay.Refresh();
 							matchDisplayLabel.Text = tempMatchingBins.ToString();
 							//requiredMatchesTxt.Text = numberOfBinsCorrect.ToString();
 							pausedDisplay.BackColor = isLoading ? Color.Red : Color.Green;
 
 							pauseCountLabel.Text = pauseSegmentList.Items.Count.ToString();
+							capture.Dispose();
 						}
 						catch
 						{
@@ -643,7 +577,7 @@ namespace SoALLoadDetector
 				matchingBins = tempMatchingBins;
 				return features;
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				Console.WriteLine("TESTESTESTEST");
 				return new List<int>();
@@ -697,7 +631,6 @@ namespace SoALLoadDetector
 			gameTime = new TimeSpan(0);
 			loadTime = new TimeSpan(0);
 			loadTimeTemp = new TimeSpan(0);
-			HistogramOfMatchingBins = new int[577];
 			currentlyPaused = false;
 			frameCount = 0;
 			lastRunningFrame = 0;
@@ -721,11 +654,24 @@ namespace SoALLoadDetector
 			realTimer.Enabled = false;
 		}
 
+		private void writePauseSegment()
+		{
+			using (System.IO.StreamWriter SaveFile = new System.IO.StreamWriter(DiagnosticsFolderName + @"pause_segment.txt"))
+			{
+				foreach (var item in pauseSegmentList.Items)
+				{
+					SaveFile.WriteLine(item.ToString());
+				}
+			}
+		}
+
 		private void startButton_Click(object sender, EventArgs e)
 		{
 
 			if(captureTimer.Enabled == true)
 			{
+				writePauseSegment();
+
 				captureTimer.Enabled = false;
 				gameTimer.Enabled = false;
 				realTimer.Enabled = false;
@@ -761,8 +707,6 @@ namespace SoALLoadDetector
 
 		#endregion Private Methods
 
-		private int currentRecordCount = 0;
-
 		private void SoALLoadDetector_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			gameTimer.Enabled = false;
@@ -770,112 +714,22 @@ namespace SoALLoadDetector
 			captureTimer.Enabled = false;
 		}
 
-		private void recordCurrentButton_Click(object sender, EventArgs e)
-		{
-			currentRecordCount++;
-			listOfFeatureVectors.Add(lastFeatures);
-			System.IO.Directory.CreateDirectory(DiagnosticsFolderName);
-			using (var file = File.CreateText(DiagnosticsFolderName + "loading_eng_features.txt"))
-			{
-				file.Write("private int[,] listOfFeatureVectorsEng = {\n");
-				foreach (var list in listOfFeatureVectors)
-				{
-					file.Write("{");
-					file.Write(string.Join(",", list));
-					file.Write("},\n");
-				}
-
-				file.Write("};\n");
-			}
-
-			using (var file = File.CreateText(DiagnosticsFolderName + "histogram.txt"))
-			{
-				int idx = 0;
-				foreach (var hist_entry in HistogramOfMatchingBins)
-				{
-					file.Write(idx.ToString() + "," + hist_entry + ";\n");
-					idx++;
-				}
-
-				file.Write("\n");
-			}
-		}
-
 		private void saveFeatureVectorToTxt(List<int> featureVector, string filename, string directoryName)
 		{
-			return;
-
-			System.IO.Directory.CreateDirectory(directoryName);
-			try
-			{
-				using (var file = File.CreateText(directoryName + "/" + filename))
-				{
-					file.Write("{");
-					file.Write(string.Join(",", featureVector));
-					file.Write("},\n");
-				}
-			}
-			catch
-			{
-				//yeah, silent catch is bad, I don't care
-			}
-		}
-
-		private void button1_Click(object sender, EventArgs e)
-		{
-			OpenFileDialog ofd = new OpenFileDialog();
-
-			DialogResult result = ofd.ShowDialog();
-
-			if(result != DialogResult.OK)
-			{
-				return;
-			}
-
-			Bitmap bmp = new Bitmap(ofd.FileName);
-
-			//Make 32 bit ARGB bitmap
-			Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
-				System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-			using (Graphics gr = Graphics.FromImage(clone))
-			{
-				gr.DrawImage(bmp, new Rectangle(0, 0, clone.Width, clone.Height));
-			}
-
-			List<int> dummy;
-			List<int> dummy2;
-			int black_level = 0;
-			var features = FeatureDetector.featuresFromBitmap(clone, out dummy, out black_level, out dummy2);
-			
-			var compare_result = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out matchingBins, -1.0f, true);
-
-			Console.WriteLine("RESULT: " + matchingBins + " matching bins, compare == " + compare_result);
-
-
-
-			currentRecordCount++;
-			listOfFeatureVectors.Add(features);
-
-			System.IO.Directory.CreateDirectory(DiagnosticsFolderName);
-			using (var file = File.CreateText(DiagnosticsFolderName + "loading_eng_features.txt"))
-			{
-				file.Write("private int[,] listOfFeatureVectorsEng = {\n");
-				foreach (var list in listOfFeatureVectors)
-				{
-					file.Write("{");
-					file.Write(string.Join(",", list));
-					file.Write("},\n");
-				}
-
-				file.Write("};\n");
-			}
-
-			bmp.Dispose();
-			clone.Dispose();
-
-			
-
+			//System.IO.Directory.CreateDirectory(directoryName);
+			//try
+			//{
+			//	using (var file = File.CreateText(directoryName + "/" + filename))
+			//	{
+			//		file.Write("{");
+			//		file.Write(string.Join(",", featureVector));
+			//		file.Write("},\n");
+			//	}
+			//}
+			//catch
+			//{
+			//	//yeah, silent catch is bad, I don't care
+			//}
 		}
 
 		private void processListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -905,7 +759,6 @@ namespace SoALLoadDetector
 				Pen drawing_pen = new Pen(Color.Magenta, 8.0f);
 				drawing_pen.Alignment = PenAlignment.Inset;
 				g.DrawRectangle(drawing_pen, selectionRectanglePreviewBox);
-
 			}
 
 			previewPictureBox.Image = capture_image;
@@ -913,52 +766,81 @@ namespace SoALLoadDetector
 
 		private void DrawPreview()
 		{
-			
+			try
+			{
 
-			ImageCaptureInfo copy = imageCaptureInfo;
-			copy.captureSizeX = previewPictureBox.Width;
-			copy.captureSizeY = previewPictureBox.Height;
 
-			//Show something in the preview
-			previewImage = CaptureImageFullPreview(ref copy);
-			float crop_size_x = copy.actual_crop_size_x;
-			float crop_size_y = copy.actual_crop_size_y;
-			
+				ImageCaptureInfo copy = imageCaptureInfo;
+				copy.captureSizeX = previewPictureBox.Width;
+				copy.captureSizeY = previewPictureBox.Height;
 
-			//Draw selection rectangle
-			DrawCaptureRectangleBitmap();
+				//Show something in the preview
+				previewImage = CaptureImageFullPreview(ref copy);
+				float crop_size_x = copy.actual_crop_size_x;
+				float crop_size_y = copy.actual_crop_size_y;
 
-			//Compute image crop coordinates according to selection rectangle
+				lastFullCapture = previewImage;
+				//Draw selection rectangle
+				DrawCaptureRectangleBitmap();
 
-			//Get raw image size from imageCaptureInfo.actual_crop_size to compute scaling between raw and rectangle coordinates
+				//Compute image crop coordinates according to selection rectangle
 
-			//Console.WriteLine("SIZE X: {0}, SIZE Y: {1}", imageCaptureInfo.actual_crop_size_x, imageCaptureInfo.actual_crop_size_y);
+				//Get raw image size from imageCaptureInfo.actual_crop_size to compute scaling between raw and rectangle coordinates
 
-			imageCaptureInfo.crop_coordinate_left = selectionRectanglePreviewBox.Left  * (crop_size_x / previewPictureBox.Width);
-			imageCaptureInfo.crop_coordinate_right = selectionRectanglePreviewBox.Right  * (crop_size_x / previewPictureBox.Width);
-			imageCaptureInfo.crop_coordinate_top = selectionRectanglePreviewBox.Top  * (crop_size_y / previewPictureBox.Height);
-			imageCaptureInfo.crop_coordinate_bottom = selectionRectanglePreviewBox.Bottom  * (crop_size_y / previewPictureBox.Height);
+				//Console.WriteLine("SIZE X: {0}, SIZE Y: {1}", imageCaptureInfo.actual_crop_size_x, imageCaptureInfo.actual_crop_size_y);
 
-			copy.crop_coordinate_left = selectionRectanglePreviewBox.Left  * (crop_size_x / previewPictureBox.Width);
-			copy.crop_coordinate_right = selectionRectanglePreviewBox.Right  * (crop_size_x / previewPictureBox.Width);
-			copy.crop_coordinate_top = selectionRectanglePreviewBox.Top  * (crop_size_y / previewPictureBox.Height);
-			copy.crop_coordinate_bottom = selectionRectanglePreviewBox.Bottom * (crop_size_y / previewPictureBox.Height);
+				imageCaptureInfo.crop_coordinate_left = selectionRectanglePreviewBox.Left * (crop_size_x / previewPictureBox.Width);
+				imageCaptureInfo.crop_coordinate_right = selectionRectanglePreviewBox.Right * (crop_size_x / previewPictureBox.Width);
+				imageCaptureInfo.crop_coordinate_top = selectionRectanglePreviewBox.Top * (crop_size_y / previewPictureBox.Height);
+				imageCaptureInfo.crop_coordinate_bottom = selectionRectanglePreviewBox.Bottom * (crop_size_y / previewPictureBox.Height);
 
-			croppedPreviewPictureBox.Image = CaptureImageFullPreview(ref copy, useCrop:true);
+				copy.crop_coordinate_left = selectionRectanglePreviewBox.Left * (crop_size_x / previewPictureBox.Width);
+				copy.crop_coordinate_right = selectionRectanglePreviewBox.Right * (crop_size_x / previewPictureBox.Width);
+				copy.crop_coordinate_top = selectionRectanglePreviewBox.Top * (crop_size_y / previewPictureBox.Height);
+				copy.crop_coordinate_bottom = selectionRectanglePreviewBox.Bottom * (crop_size_y / previewPictureBox.Height);
 
-			copy.captureSizeX = captureSize.Width;
-			copy.captureSizeY = captureSize.Height;
+				Bitmap full_cropped_capture = CaptureImageFullPreview(ref copy, useCrop: true);
+				croppedPreviewPictureBox.Image = full_cropped_capture;
+				lastFullCroppedCapture = full_cropped_capture;
 
-			//Show matching bins for preview
-			var capture = CaptureImage();
-			List<int> dummy;
-			List<int> dummy2;
-			int black_level = 0;
-			var features = FeatureDetector.featuresFromBitmap(capture, out dummy, out black_level, out dummy2);
-			int tempMatchingBins = 0;
-			var isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
+				copy.captureSizeX = captureSize.Width;
+				copy.captureSizeY = captureSize.Height;
 
-			matchDisplayLabel.Text = tempMatchingBins.ToString();
+				//Show matching bins for preview
+				var capture = CaptureImage();
+				List<int> dummy;
+				List<int> dummy2;
+				int black_level = 0;
+				var features = FeatureDetector.featuresFromBitmap(capture, out dummy, out black_level, out dummy2);
+				int tempMatchingBins = 0;
+				var isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
+
+				lastFeatures = features;
+				lastDiagnosticCapture = capture;
+				lastMatchingBins = tempMatchingBins;
+				matchDisplayLabel.Text = Math.Round((Convert.ToSingle(tempMatchingBins) / Convert.ToSingle(FeatureDetector.listOfFeatureVectorsEng.GetLength(1))), 4).ToString();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error: " + ex.ToString());
+			}
+		}
+
+		private void initImageCaptureInfo()
+		{
+			imageCaptureInfo = new ImageCaptureInfo();
+
+			selectionTopLeft = new Point(0, 0);
+			selectionBottomRight = new Point(previewPictureBox.Width, previewPictureBox.Height);
+			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
+
+			imageCaptureInfo.featureVectorResolutionX = featureVectorResolutionX;
+			imageCaptureInfo.featureVectorResolutionY = featureVectorResolutionY;
+			imageCaptureInfo.captureSizeX = captureSize.Width;
+			imageCaptureInfo.captureSizeY = captureSize.Height;
+			imageCaptureInfo.cropOffsetX = cropOffsetX;
+			imageCaptureInfo.cropOffsetY = cropOffsetY;
+			imageCaptureInfo.captureAspectRatio = captureAspectRatioX / captureAspectRatioY;
 		}
 
 		private void SetRectangleFromMouse(MouseEventArgs e)
@@ -979,8 +861,6 @@ namespace SoALLoadDetector
 			}
 
 			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
-
-
 		}
 
 		private void previewPictureBox_MouseClick(object sender, MouseEventArgs e)
@@ -998,7 +878,6 @@ namespace SoALLoadDetector
 				DrawCaptureRectangleBitmap();
 				drawingPreview = false;
 			}
-			
 		}
 
 		private void previewPictureBox_MouseUp(object sender, MouseEventArgs e)
@@ -1013,21 +892,21 @@ namespace SoALLoadDetector
 			DrawPreview();
 		}
 
-		private void trackBar1_ValueChanged(object sender, EventArgs e)
+		private void scaleTrackBar_ValueChanged(object sender, EventArgs e)
 		{
-			scalingValue = trackBar1.Value;
+			scalingValue = scaleTrackBar.Value;
 
-			if (scalingValue % trackBar1.SmallChange != 0)
+			if (scalingValue % scaleTrackBar.SmallChange != 0)
 			{
-				scalingValue = (scalingValue / trackBar1.SmallChange) * trackBar1.SmallChange;
+				scalingValue = (scalingValue / scaleTrackBar.SmallChange) * scaleTrackBar.SmallChange;
 
-				trackBar1.Value = scalingValue;
+				scaleTrackBar.Value = scalingValue;
 				
 			}
 
 			scalingValueFloat = ((float)scalingValue) / 100.0f;
 
-			scalingLabel.Text = "Scaling: " + trackBar1.Value.ToString() + "%";
+			scalingLabel.Text = "Scaling: " + scaleTrackBar.Value.ToString() + "%";
 
 			DrawPreview();
 		}
@@ -1036,72 +915,19 @@ namespace SoALLoadDetector
 		{
 			MinimumBlackLength = Convert.ToSingle(requiredMatchesUpDown.Value);
 		}
+	}
 
-		private void button2_Click(object sender, EventArgs e)
-		{
-			FolderBrowserDialog fbd = new FolderBrowserDialog();
-		
-			DialogResult result = fbd.ShowDialog();
+	[Serializable]
+	public class DetectorData
+	{
+		public int offsetX;
+		public int offsetY;
+		public int sizeX;
+		public int sizeY;
+		public int numPatchesX;
+		public int numPatchesY;
+		public int numberOfHistogramBins;
 
-			if (result != DialogResult.OK)
-			{
-				return;
-			}
-
-			DirectoryInfo d = new DirectoryInfo(fbd.SelectedPath);
-
-			foreach (var file in d.GetFiles("*.jpg"))
-			{
-				Bitmap bmp = new Bitmap(file.FullName);
-
-				//Make 32 bit ARGB bitmap
-				Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
-					System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-				using (Graphics gr = Graphics.FromImage(clone))
-				{
-					gr.DrawImage(bmp, new Rectangle(0, 0, clone.Width, clone.Height));
-				}
-
-				List<int> dummy;
-				List<int> dummy2;
-				int black_level = 0;
-				var features = FeatureDetector.featuresFromBitmap(clone, out dummy, out black_level, out dummy2);
-				int tempMatchingBins = 0;
-				var compare_result = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins);
-
-				Console.WriteLine("RESULT: " + tempMatchingBins + " matching bins, compare == " + compare_result);
-
-
-				if(tempMatchingBins < FeatureDetector.numberOfBinsCorrect)
-				{
-					currentRecordCount++;
-					listOfFeatureVectors.Add(features);
-					clone.Save(currentRecordCount.ToString() + ".jpg");
-				}
-				
-
-				
-
-				bmp.Dispose();
-				clone.Dispose();
-			}
-
-			System.IO.Directory.CreateDirectory(DiagnosticsFolderName);
-			using (var feature_file = File.CreateText(DiagnosticsFolderName + "loading_eng_features.txt"))
-			{
-				feature_file.Write("private int[,] listOfFeatureVectorsEng = {\n");
-				foreach (var list in listOfFeatureVectors)
-				{
-					feature_file.Write("{");
-					feature_file.Write(string.Join(",", list));
-					feature_file.Write("},\n");
-				}
-
-				feature_file.Write("};\n");
-			}
-
-
-		}
+		public List<int[]> features;
 	}
 }

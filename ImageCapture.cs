@@ -261,7 +261,7 @@ namespace SoALLoadDetector
 
 				return ResizeImage(ret, info.captureSizeX, info.captureSizeY);
 			}
-			catch (System.Runtime.InteropServices.ExternalException ex)
+			catch (System.Runtime.InteropServices.ExternalException)
 			{
 
 				return new Bitmap(10, 10);

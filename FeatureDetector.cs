@@ -34,9 +34,6 @@ namespace SoALLoadDetector
 
 		public static int patchSizeY = 50;
 
-		//used as a cutoff for when a match is detected correctly
-		private static float varianceOfBinsAllowed = 1.0f;
-
 		private static float varianceOfBinsAllowedMult = 1.45f;
 
 		#endregion Private Fields
